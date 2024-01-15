@@ -1,5 +1,9 @@
 package neu.edu.controller;
+/*
+This file is the controller of  Manufacture Springboot application which is a microservice of the Supply Chain Management System project, 
+this controller maps the API request from the Supplier and the Distributor checks the inventory of products and items and  returns the appropriate page with  information 
 
+*/
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -49,218 +53,231 @@ public class ManufactureController {
 	public ManufactureController() {
 		// TODO Auto-generated constructor stub
 	}
-	/*
-	@RequestMapping(value = "procurementManagerDashboard", method = RequestMethod.GET)
-	public  ModelAndView getDashboard(@ModelAttribute("rawmaterialModel") String rawmaterialModel,Model model) {
-		model.addAttribute("rawmaterialModel",rawmaterialModel);
-		
-	    return new ModelAndView("procurementManagerDashboard");
-
-	}
-	*/
+	// returns order dashboard with the order information for a particular manufacturer
 	@RequestMapping(value = "placeOrderDashboard", method = RequestMethod.POST)
-	public  ModelAndView placeOrderDashboard(@Valid @ModelAttribute RawmaterialModel rawmaterialModel,@ModelAttribute("comp") String comp,@ModelAttribute("error") String error,Model model) {
+	public  ModelAndView placeOrderDashboard(@Valid @ModelAttribute RawmaterialModel rawmaterialModel,@ModelAttribute("id") String comp,@ModelAttribute("error") String error,Model model) {
 		
-		model.addAttribute("comp",rawmaterialModel.getManufactureid());
-		System.out.println(rawmaterialModel.getManufactureid()+"from dash");
+		model.addAttribute("id",rawmaterialModel.getManufactureid());
 		model.addAttribute("error",error);
-	    return new ModelAndView("placeOrderDashboard");
+	        return new ModelAndView("placeOrderDashboard");
 
 	}
+
+	// returns the jsp page where products can be created
 	@RequestMapping(value = "createproduct", method = RequestMethod.POST)
-	public  ModelAndView createproduct(@Valid @ModelAttribute RawmaterialModel rawmaterialModel,@ModelAttribute("comp") String comp,@ModelAttribute("error") String error,Model model) {
+	public  ModelAndView createProduct(@Valid @ModelAttribute RawmaterialModel rawmaterialModel,@ModelAttribute("id") String comp,@ModelAttribute("error") String error,Model model) {
 		
-		model.addAttribute("comp",rawmaterialModel.getManufactureid());
+		model.addAttribute("id",rawmaterialModel.getManufactureid());
 		
-	    return new ModelAndView("createProduct");
+	       return new ModelAndView("createProduct");
 
 	}
+
+	// returns all the products of a particular manufacturer
 	@RequestMapping(value = "products", method = RequestMethod.POST)
-	public  ModelAndView products(@Valid @ModelAttribute ProductModel productModel,@ModelAttribute("comp") String comp,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
+	public  ModelAndView products(@Valid @ModelAttribute ProductModel productModel,@ModelAttribute("id") String comp,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
 		
-		//model.addAttribute("comp",rawmaterialModel.getManufactureid());
-		List<ProductModel> pm=manufactureService.findProductsBymanufactureid(productModel.getManufactureid());
-		model.addAttribute("product", pm);
-		model.addAttribute("comp",productModel.getManufactureid());
+		// gets product object from manufacture microservice
+		List<ProductModel> product=manufactureService.findProductsBymanufactureid(productModel.getManufactureid());
+		model.addAttribute("product", product);
+		model.addAttribute("id",productModel.getManufactureid());
 	    return new ModelAndView("products");
 
 	}
+
+	// Returns update manufacture page
 	@RequestMapping(value = "updatemanufacture", method = RequestMethod.POST)
-	public  ModelAndView updatemanufacture(@Valid @ModelAttribute ManufactureModel manufactureModel,@ModelAttribute("comp") String comp,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
-		
+	public  ModelAndView updateManufacturePage(@Valid @ModelAttribute ManufactureModel manufactureModel,@ModelAttribute("id") String comp,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
+		// gets manufacture object from manufacture microservice
 		ManufactureModel manufacture=manufactureService.getManufacture(manufactureModel.getManufactureid());
 		model.addAttribute("manufacture", manufacture);
 		
 	    return new ModelAndView("updateManufacture");
 
 	}
+
+	// Updates the Manufacturer details and returns the Manager dashboard
 	@RequestMapping(value = "updatemanufacturer", method = RequestMethod.POST)
-	public  ModelAndView updatemanufacturer(@Valid @ModelAttribute ManufactureModel manufactureModel,@ModelAttribute("comp") String comp,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
-		
+	public  ModelAndView updateManufacturer(@Valid @ModelAttribute ManufactureModel manufactureModel,@ModelAttribute("id") String id,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
+		// updates the manufacture object and gets the object
 		manufactureService.updateManufacture(manufactureModel);
 		ManufactureModel manufacture = manufactureService.getManufacture(manufactureModel.getManufactureid());  
 		System.out.println("done printing");
 		model.addAttribute("manufactureModel",manufacture);
-		//model.addAttribute("comp", emp.getCompanyid());
+
 		return new ModelAndView("supplyManagerDashboard");
 	 
 
 	}
+
+	// Returns the production manager dashboard
 	@RequestMapping(value = "getbackproductionmanagerDashboard", method = RequestMethod.POST)
-	public  ModelAndView getBackManagerDashboard(@ModelAttribute("comp") String comp,Model model) throws URISyntaxException, IOException, InterruptedException {
-		List<RawmaterialModel> rawmaterialModel1 = manufactureService.findRawMaterials(comp);
+	public  ModelAndView getBackManagerDashboard(@ModelAttribute("id") String id,Model model) throws URISyntaxException, IOException, InterruptedException {
+
+		// gets Raw material object from Supplier microservice
+		List<RawmaterialModel> rawmaterialModel1 = manufactureService.findRawMaterials(id);
 		
 		model.addAttribute("rawmaterial",rawmaterialModel1);
-		//model.addAttribute("comp", comp);
+		
 		
 		return new ModelAndView("productionManagerDashboard");
 
 	}
+
+	// Returns the supply manager dashboard
 	@RequestMapping(value = "getbacksupplydashboard", method = RequestMethod.POST)
 	public  ModelAndView getbacksupplydashboard(@Valid @ModelAttribute ProductModel productModel,Model model) throws URISyntaxException, IOException, InterruptedException {
+		
+		// gets manufacture object from manufacture microservice
 		ManufactureModel manufactureModel = manufactureService.getManufacture(productModel.getManufactureid());  
 		System.out.println("done printing");
 		model.addAttribute("manufactureModel",manufactureModel);
-		//model.addAttribute("comp", emp.getCompanyid());
+		
 		return new ModelAndView("supplyManagerDashboard");
 	}
+
+	// returns the list of orders from a distributers for a Manufacturer 
 	@RequestMapping(value = "distributerorderstomanufacture", method = RequestMethod.POST)
 	public  ModelAndView distributerorderstomanufacture(@Valid @ModelAttribute DistributerOrders distributerOrders,Model model) throws URISyntaxException, IOException, InterruptedException {
-		List<DistributerOrders> ddis=manufactureService.findDistributerorderbymanufacture(distributerOrders.getManufactureid());
-		System.out.println("done printing");
-		model.addAttribute("distributerOrders",ddis);
-		model.addAttribute("comp", distributerOrders.getManufactureid());
+		List<DistributerOrders> orders=manufactureService.findDistributerorderbymanufacture(distributerOrders.getManufactureid());
+		model.addAttribute("distributerOrders",orders);
+		model.addAttribute("id", distributerOrders.getManufactureid());
 		return new ModelAndView("distributerOrderstomanufacture");
 	}
 	
+
+	// Creates products based on the availability of raw materials 
 	@RequestMapping(value = "registerproduct", method = RequestMethod.POST)
-	public  ModelAndView registerproduct(@Valid @ModelAttribute ProductModel productModel,@ModelAttribute("comp") String comp,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
-		ProductModel pm=manufactureService.findProductid(productModel.getProductid());
-		if(!(Objects.isNull(pm)))
+	public  ModelAndView registerProduct(@Valid @ModelAttribute ProductModel productModel,@ModelAttribute("id") String comp,@ModelAttribute("error") String error,Model model) throws URISyntaxException, IOException, InterruptedException {
+		ProductModel product=manufactureService.findProductid(productModel.getProductid());
+		// returns error if the product Id already exists
+		if(!(Objects.isNull(product)))
 		{
-			model.addAttribute("comp",productModel.getManufactureid());
-			String er="Product ID already exsit";
-			model.addAttribute("error",er);
+			model.addAttribute("id",productModel.getManufactureid());
+			String error="Product ID already exist";
+			model.addAttribute("error",error);
 		    return new ModelAndView("createProduct");
 		}
+		
+		// checks if the availability of raw materials, if available then creates the product and updates the raw material quantity if not then returns error 
 		if(productModel.getProductname().equalsIgnoreCase("laptop"))
 		{
-			RawmaterialModel rm= new RawmaterialModel();
-			rm.setManufactureid(productModel.getManufactureid());
-			rm.setItemname("motherboard");
-			RawmaterialModel ans = manufactureService.getRawmaterial(rm);
-			RawmaterialModel rm1= new RawmaterialModel();
-			rm1.setManufactureid(productModel.getManufactureid());
-			rm1.setItemname("ram");
-			RawmaterialModel ans1 = manufactureService.getRawmaterial(rm1);
-			System.out.println(ans1);
-			System.out.println(ans);
-			if(Objects.isNull(ans) ||Objects.isNull(ans1))
+			RawmaterialModel material1= new RawmaterialModel();
+			material1.setManufactureid(productModel.getManufactureid());
+			material1.setItemname("motherboard");
+			RawmaterialModel material1_availability= manufactureService.getRawmaterial(material1);
+			RawmaterialModel material2= new RawmaterialModel();
+			material2.setManufactureid(productModel.getManufactureid());
+			material2.setItemname("ram");
+			RawmaterialModel material2_availability = manufactureService.getRawmaterial(material2);
+			
+			if(Objects.isNull(material1_availability) ||Objects.isNull(material2_availability))
 			{
-				model.addAttribute("comp",productModel.getManufactureid());
-				String er="Raw materials not available";
-				model.addAttribute("error", er);
+				model.addAttribute("id",productModel.getManufactureid());
+				String error="Raw materials not available";
+				model.addAttribute("error", error);
 			    return new ModelAndView("createProduct");
 			}
-			System.out.println(ans.getAvailability());
-			System.out.println(ans1.getAvailability());
-			if(ans.getAvailability()>=productModel.getAvailability() && ans1.getAvailability()>=productModel.getAvailability())
+			//System.out.println(material1_availability.getAvailability());
+			//System.out.println(material2_availability.getAvailability());
+			if(material1_availability.getAvailability()>=productModel.getAvailability() && material2_availability.getAvailability()>=productModel.getAvailability())
 			{
-				int  available1=ans.getAvailability()-productModel.getAvailability();
-				int  available2=ans1.getAvailability()-productModel.getAvailability();
-				ans.setAvailability(available1);
-				ans1.setAvailability(available2);
-				manufactureService.updateRawmaterial(ans);
-				manufactureService.updateRawmaterial(ans1);
+				int  available1=material1_availability.getAvailability()-productModel.getAvailability();
+				int  available2=material2_availability.getAvailability()-productModel.getAvailability();
+				material1_availability.setAvailability(available1);
+				material2_availability.setAvailability(available2);
+				manufactureService.updateRawmaterial(material1_availability);
+				manufactureService.updateRawmaterial(material2_availability);
 				manufactureService.createProduct(productModel);
 				List<RawmaterialModel> rawmaterialModel1 = manufactureService.findRawMaterials(productModel.getManufactureid());
 				
 				model.addAttribute("rawmaterial",rawmaterialModel1);
-				model.addAttribute("comp", productModel.getManufactureid());
+				model.addAttribute("id", productModel.getManufactureid());
 				return new ModelAndView("productionManagerDashboard");
 			}
 			else
 			{
-				model.addAttribute("comp",productModel.getManufactureid());
-				String er="Your requirement is over the stock";
-				model.addAttribute("error", er);
+				model.addAttribute("id",productModel.getManufactureid());
+				String error="Your requirement is over the stock";
+				model.addAttribute("error", error);
 			    return new ModelAndView("createProduct");
 			}
 		}else if(productModel.getProductname().equalsIgnoreCase("refregirator"))
 		{
-			RawmaterialModel rm= new RawmaterialModel();
-			rm.setManufactureid(productModel.getManufactureid());
-			rm.setItemname("coolent");
-			RawmaterialModel ans = manufactureService.getRawmaterial(rm);
-			RawmaterialModel rm1= new RawmaterialModel();
-			rm1.setManufactureid(productModel.getManufactureid());
-			rm1.setItemname("compressor");
-			RawmaterialModel ans1 = manufactureService.getRawmaterial(rm);
-			if(ans.getAvailability()>=productModel.getAvailability() && ans1.getAvailability()>=productModel.getAvailability())
+			RawmaterialModel material1= new RawmaterialModel();
+			material1.setManufactureid(productModel.getManufactureid());
+			material1.setItemname("coolent");
+			RawmaterialModel material1_availability = manufactureService.getRawmaterial(material1);
+			RawmaterialModel material2= new RawmaterialModel();
+			material2.setManufactureid(productModel.getManufactureid());
+			material2.setItemname("compressor");
+			RawmaterialModel material2_availability = manufactureService.getRawmaterial(material2);
+			if(material1_availability.getAvailability()>=productModel.getAvailability() && material2_availability.getAvailability()>=productModel.getAvailability())
 			{
-				int  available1=ans.getAvailability()-productModel.getAvailability();
-				int  available2=ans1.getAvailability()-productModel.getAvailability();
-				ans.setAvailability(available1);
-				ans1.setAvailability(available2);
-				manufactureService.updateRawmaterial(ans);
-				manufactureService.updateRawmaterial(ans1);
+				int  available1=material1_availability.getAvailability()-productModel.getAvailability();
+				int  available2=material2_availability.getAvailability()-productModel.getAvailability();
+				material1_availability.setAvailability(available1);
+				material2_availability.setAvailability(available2);
+				manufactureService.updateRawmaterial(material1_availability);
+				manufactureService.updateRawmaterial(material2_availability);
 				manufactureService.createProduct(productModel);
 				List<RawmaterialModel> rawmaterialModel1 = manufactureService.findRawMaterials(productModel.getManufactureid());
 				
 				model.addAttribute("rawmaterial",rawmaterialModel1);
-				model.addAttribute("comp", productModel.getManufactureid());
+				model.addAttribute("id", productModel.getManufactureid());
 				return new ModelAndView("productionManagerDashboard");
 			}
 			else
 			{
-				model.addAttribute("comp",productModel.getManufactureid());
-				String er="Your requirement is over the stock";
-				model.addAttribute("error", er);
+				model.addAttribute("id",productModel.getManufactureid());
+				String error="Your requirement is over the stock";
+				model.addAttribute("error", error);
 			    return new ModelAndView("createProduct");
 			}
 		}else if(productModel.getProductname().equalsIgnoreCase("tv"))
 		{
-			RawmaterialModel rm= new RawmaterialModel();
-			rm.setManufactureid(productModel.getManufactureid());
-			rm.setItemname("leddisplay");
-			RawmaterialModel ans = manufactureService.getRawmaterial(rm);
-			RawmaterialModel rm1= new RawmaterialModel();
-			rm1.setManufactureid(productModel.getManufactureid());
-			rm1.setItemname("tvchip");
-			RawmaterialModel ans1 = manufactureService.getRawmaterial(rm);
-			if(ans.getAvailability()>=productModel.getAvailability() && ans1.getAvailability()>=productModel.getAvailability())
+			RawmaterialModel material1= new RawmaterialModel();
+			material1.setManufactureid(productModel.getManufactureid());
+			material1.setItemname("leddisplay");
+			RawmaterialModel material1_availability = manufactureService.getRawmaterial(material1);
+			RawmaterialModel material2= new RawmaterialModel();
+			material2.setManufactureid(productModel.getManufactureid());
+			material2.setItemname("tvchip");
+			RawmaterialModel material2_availability = manufactureService.getRawmaterial(material2);
+			if(material1_availability.getAvailability()>=productModel.getAvailability() && material2_availability.getAvailability()>=productModel.getAvailability())
 			{
-				int  available1=ans.getAvailability()-productModel.getAvailability();
-				int  available2=ans1.getAvailability()-productModel.getAvailability();
-				ans.setAvailability(available1);
-				ans1.setAvailability(available2);
-				manufactureService.updateRawmaterial(ans);
-				manufactureService.updateRawmaterial(ans1);
+				int  available1=material1_availability.getAvailability()-productModel.getAvailability();
+				int  available2=material2_availability.getAvailability()-productModel.getAvailability();
+				material1_availability.setAvailability(available1);
+				material2_availability.setAvailability(available2);
+				manufactureService.updateRawmaterial(material1_availability);
+				manufactureService.updateRawmaterial(material2_availability);
 				manufactureService.createProduct(productModel);
 				List<RawmaterialModel> rawmaterialModel1 = manufactureService.findRawMaterials(productModel.getManufactureid());
 				
 				model.addAttribute("rawmaterial",rawmaterialModel1);
-				model.addAttribute("comp", productModel.getManufactureid());
+				model.addAttribute("id", productModel.getManufactureid());
 				return new ModelAndView("productionManagerDashboard");
 			}
 			else
 			{
 				model.addAttribute("comp",productModel.getManufactureid());
-				String er="Your requirement is over the stock";
-				model.addAttribute("error", er);
+				String error="Your requirement is over the stock";
+				model.addAttribute("error", error);
 			    return new ModelAndView("createProduct");
 			}
 		}
-		model.addAttribute("comp",productModel.getManufactureid());
+		model.addAttribute("id",productModel.getManufactureid());
 		
 	    return new ModelAndView("createProduct");
 
 	}
+
+	// returns list of options to buy raw materials based on various supply chain conditions from all suppliers
 	@RequestMapping(value = "orderprocess", method = RequestMethod.POST)
-	public  ModelAndView orderprocess(@Valid @ModelAttribute ItemModel itemModel,Model model) throws URISyntaxException, IOException, InterruptedException {
+	public  ModelAndView orderProcess(@Valid @ModelAttribute ItemModel itemModel,Model model) throws URISyntaxException, IOException, InterruptedException {
 		
-		//model.addAttribute("comp",rawmaterialModel.getManufactureid());
-		//List<ItemModel> itemModel1=manufactureService.findItemsbyitemname(itemModel.getItemname());
+		
 		String Manufactureid=itemModel.getSupplierid();
 		System.out.println(Manufactureid+"rrtyu");
 		List<Options> option = new ArrayList<>();
@@ -311,18 +328,20 @@ public class ManufactureController {
 			
 		}
 		model.addAttribute("option",option);
-		model.addAttribute("comp",Manufactureid);
+		model.addAttribute("id",Manufactureid);
 	    return new ModelAndView("orderOptions");
 
 	}
+
+	// requests the selected option raw material item to the supplier and creates order on supplier microservice and manufacture microservices by setting its status and returns procurement manager dashboard
 	@RequestMapping(value = "orderrequested", method = RequestMethod.POST)
-	public  ModelAndView getManagerDashboard(@ModelAttribute("itemid1") String item1,@ModelAttribute("orderid") String orderid,@ModelAttribute("units") String units,@ModelAttribute("comp") String comp,Model model) throws URISyntaxException, IOException, InterruptedException {
+	public  ModelAndView getManagerDashboard(@ModelAttribute("itemid1") String item1,@ModelAttribute("orderid") String orderid,@ModelAttribute("units") String units,@ModelAttribute("id") String comp,Model model) throws URISyntaxException, IOException, InterruptedException {
 		
 		//model.addAttribute("comp",comp);
 		ManufactureOrder order1= manufactureService.findOrder(Integer.parseInt(orderid));
 		if (!(Objects.isNull(order1)))
 		{
-			model.addAttribute("comp",comp);
+			model.addAttribute("id",id);
 			//System.out.println(rawmaterialModel.getManufactureid()+"from dash");
 			String error="Order ID Already exsit";
 			model.addAttribute("error",error);
@@ -330,7 +349,7 @@ public class ManufactureController {
 			
 		}
 		System.out.println(item1);
-		System.out.println(comp);
+		
 		ManufactureOrder manufactureOrder = new ManufactureOrder();
 		Options option= new Options();
 		String[] arr=item1.split(",");
@@ -349,113 +368,109 @@ public class ManufactureController {
 		manufactureOrder.setOrderid(Integer.parseInt(orderid));
 		manufactureOrder.setUnits(Integer.parseInt(units));
 		manufactureOrder.setSupplierid(item.getSupplierid());
-		manufactureOrder.setStatus("requested by "+item.getSupplierid());
+		manufactureOrder.setStatus("requested to "+item.getSupplierid());
 		manufactureOrder.setManufactureid(comp);
-		boolean ans = supplierService.createOrder(option);
-		boolean ans1= manufactureService.createOrder(manufactureOrder);
+		// sends request to supplier
+		boolean supplierOrderCreated = supplierService.createOrder(option);
+		// creates requested order in manufacturer
+		boolean manufactureOrderRequested= manufactureService.createOrder(manufactureOrder);
 		List<RawmaterialModel> rawmaterialModel = manufactureService.findRawMaterials(comp);
 		System.out.println("done printing");
 		model.addAttribute("rawmaterialModel",rawmaterialModel);
 		return new ModelAndView("procurementManagerDashboard");
 	}
+
+	// accepts the orders requested by the distributer based on the availability if available process the order else retuens orders page
 	@RequestMapping(value = "orderacceptbymanufacture", method = RequestMethod.POST)
 	public  ModelAndView acceptOrder(@Valid @ModelAttribute DistributerOrders distributerOrders ,@ModelAttribute("error") String error,BindingResult bindingResult, Model model) throws URISyntaxException, IOException, InterruptedException {
-		DistributerOrders op=manufactureService.getDistributerOrderbyorderid(distributerOrders.getOrderid());
-		System.out.println(distributerOrders.getOrderid());
-		System.out.println(op.getProductid());
-		System.out.println(op.getStatus());
-		if(op.getStatus().equalsIgnoreCase("Completed"))
+		DistributerOrders requestedOrder=manufactureService.getDistributerOrderbyorderid(distributerOrders.getOrderid());
+		
+
+		if(requestedOrder.getStatus().equalsIgnoreCase("Completed"))
 		{
 			System.out.println("in");
-			model.addAttribute("comp",op.getManufactureid());
-			String er2="Order already processed";
-			model.addAttribute("error", er2);
-			List<DistributerOrders> op2= manufactureService.findDistributerorderbymanufacture(op.getManufactureid());
-			model.addAttribute("distributerOrders",op2);
+			model.addAttribute("id",requestedOrder.getManufactureid());
+			String error="Order already processed";
+			model.addAttribute("error", error);
+			List<DistributerOrders> orders= manufactureService.findDistributerorderbymanufacture(requestedOrder.getManufactureid());
+			model.addAttribute("distributerOrders",orders);
 		    return new ModelAndView("distributerOrderstomanufacture");
 		}
-		ProductModel item=manufactureService.findProductid(op.getProductid());
+		ProductModel item=manufactureService.findProductid(requestedOrder.getProductid());
 		//System.out.println(item.getAvailability());
 		//System.out.println(op.getUnits());
-		if(item.getAvailability()>=op.getUnits())
+		if(item.getAvailability()>=requestedOrder.getUnits())
 		{	
 			System.out.println("ini");
-			int available=item.getAvailability()- op.getUnits();
+			int available=item.getAvailability()- requestedOrder.getUnits();
 			int cost=item.getCost()/item.getAvailability();
-			int newcost=cost*op.getUnits();
+			int newcost=cost*requestedOrder.getUnits();
 			cost=(cost) * (available);
 			
-			ProductModel itemup=new ProductModel();
-			itemup.setProductid(item.getProductid());
-			itemup.setAvailability(available);
-			itemup.setCost(cost);
-			boolean ans=manufactureService.updateProduct(itemup);
-			String[] ar=op.getStatus().split(" ");
-			String rawid= Integer.toString(item.getProductid())+ar[2];
-			////------------------
-			//RawmaterialModel rw= manufactureService.findRawMaterialbyrawid(rawid);
-			DistributerProduct rw = distributerService.findProductbyupc(rawid);
-			if(Objects.isNull(rw))
+			ProductModel itemUpdate=new ProductModel();
+			itemUpdate.setProductid(item.getProductid());
+			itemUpdate.setAvailability(available);
+			itemUpdate.setCost(cost);
+			boolean resultUpdated=manufactureService.updateProduct(itemUpdate);
+			String[] ar=requestedOrder.getStatus().split(" ");
+			String productUPC= Integer.toString(item.getProductid())+ar[2];
+			
+			// checks if product already presnt if yes, then updates the quantity and cost else creates new product
+
+			DistributerProduct newProduct = distributerService.findProductbyupc(productUPC);
+			if(Objects.isNull(newProduct))
 			{
-				DistributerProduct raw= new DistributerProduct();
-				raw.setProductid(op.getProductid());
-				raw.setAvailability(op.getUnits());
-				raw.setProductname(op.getProductname());
-				raw.setProductupc(rawid);
-				System.out.println(ar[2]);
-				raw.setDistributerid(ar[2]);
+				DistributerProduct product= new DistributerProduct();
+				product.setProductid(requestedOrder.getProductid());
+				product.setAvailability(requestedOrder.getUnits());
+				product.setProductname(requestedOrder.getProductname());
+				product.setProductupc(productUPC);
+				product.setDistributerid(ar[2]);
 				System.out.println("before");
-				//manufactureService.createRawmaterial(raw);
-				raw.setCost(newcost);
-				distributerService.createProduct(raw);
-				System.out.println("after");
+				product.setCost(newcost);
+				distributerService.createProduct(product);
+				
 				
 			}
 			else
 			{
-				rw.setAvailability(op.getUnits()+rw.getAvailability());
-				rw.setCost(newcost);
-				//manufactureService.updateRawmaterial(rw);
-				distributerService.updateDistributerProduct(rw);
+				newProduct.setAvailability(requestedOrder.getUnits()+newProduct.getAvailability());
+				newProduct.setCost(newcost);
+				
+				distributerService.updateDistributerProduct(newProduct);
 			}
-			//Options op1= new Options();
-			DistributerOrders op1 = new DistributerOrders();
-			op1.setOrderid(distributerOrders.getOrderid());
-			op1.setStatus("Completed");
-			//supplierService.updateOrderStatus(op1);//manufactureside
-			manufactureService.updateDistributerOrderStatus(op1);
-			DistributerManufactureOrder mo= new DistributerManufactureOrder();
-			mo.setOrderid(distributerOrders.getOrderid());
-			mo.setStatus("Completed");
-			//manufactureService.updateOrderStatus(mo);
-			distributerService.updateManufactureorderstatus(mo);
+			
+			// updates status at manufacture
+			DistributerOrders distributerOrder = new DistributerOrders();
+			distributerOrder.setOrderid(distributerOrders.getOrderid());
+			distributerOrder.setStatus("Completed");
+			
+			manufactureService.updateDistributerOrderStatus(distributerOrder);
+
+			// updates status at distributer
+			DistributerManufactureOrder manufactureOrder= new DistributerManufactureOrder();
+			manufactureOrder.setOrderid(distributerOrders.getOrderid());
+			manufactureOrder.setStatus("Completed");
+			
+			distributerService.updateManufactureorderstatus(manufactureOrder);
+
 			ManufactureModel manufactureModel = manufactureService.getManufacture(item.getManufactureid());  
-			System.out.println("done printing");
+	
 			model.addAttribute("manufactureModel",manufactureModel);
-			//model.addAttribute("comp", emp.getCompanyid());
+			
 			return new ModelAndView("supplyManagerDashboard");
 		}else
 		{
-			String er="check the quantity ordered is understocked";
-			model.addAttribute("error", er);
-			List<DistributerOrders> op2= manufactureService.findDistributerorderbymanufacture(op.getManufactureid());
-			model.addAttribute("distributerOrders",op2);
+			
+			String error="check the quantity ordered is understocked";
+			model.addAttribute("error", error);
+			List<DistributerOrders> orders= manufactureService.findDistributerorderbymanufacture(op.getManufactureid());
+			model.addAttribute("distributerOrders",orders);
 		    return new ModelAndView("distributerOrderstomanufacture");
 		}
 	   
 
 	}
-	/*
-	@RequestMapping(value = "distributerorderstomanufacture", method = RequestMethod.POST)
-	public  ModelAndView distributerOrder(@Valid @ModelAttribute ProductModel productModel ,@ModelAttribute("error") String error,BindingResult bindingResult, Model model) throws URISyntaxException, IOException, InterruptedException {
-		model.addAttribute("comp",productModel.getManufactureid());
-		model.addAttribute("error", error);
-		//List<Options> op= supplierService.findOrders(itemModel.getSupplierid());
-		List<DistributerOrders>op=manufactureService.findDistributerorderbymanufacture(productModel.getManufactureid());
-		model.addAttribute("order",op);
-	    return new ModelAndView("distributerOrderstomanufacture");
-
-	}
-	*/
+	
 
 }
